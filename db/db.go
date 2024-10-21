@@ -41,6 +41,7 @@ func createTables() error {
 		CREATE TABLE IF NOT EXISTS dictionary (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			word TEXT NOT NULL,
+			translate TEXT NOT NULL,
 			description TEXT NOT NULL,
 			example TEXT NOT NULL
 		)

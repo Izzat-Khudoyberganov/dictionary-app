@@ -9,12 +9,13 @@ import (
 type Dictionary struct {
 	ID          int64
 	Word        string `binding:"required"`
+	Translate   string `binding:"required"`
 	Description string `binding:"required"`
 	Example     string `binding:"required"`
 }
 
 func (d Dictionary) SaveDictionary() error {
-	query := "INSERT INTO dictionary(word, description, example) VALUES (?, ?, ?)"
+	query := "INSERT INTO dictionary(word, translate, description, example) VALUES (?, ?, ?, ?)"
 
 	stmt, err := db.DB.Prepare(query)
 
@@ -24,7 +25,7 @@ func (d Dictionary) SaveDictionary() error {
 
 	defer stmt.Close()
 
-	result, err := stmt.Exec(d.Word, d.Description, d.Example)
+	result, err := stmt.Exec(d.Word, d.Translate, d.Description, d.Example)
 
 	if err != nil {
 		return err
@@ -37,7 +38,7 @@ func (d Dictionary) SaveDictionary() error {
 }
 
 func GetAllDictionary() ([]Dictionary, error) {
-	query := "SELECT id, word, description, example FROM dictionary"
+	query := "SELECT id, word, translate, description, example FROM dictionary"
 
 	rows, err := db.DB.Query(query)
 
@@ -52,7 +53,7 @@ func GetAllDictionary() ([]Dictionary, error) {
 	for rows.Next() {
 		var dic Dictionary
 
-		err := rows.Scan(&dic.ID, &dic.Word, &dic.Description, &dic.Example)
+		err := rows.Scan(&dic.ID, &dic.Word, &dic.Translate, &dic.Description, &dic.Example)
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +65,7 @@ func GetAllDictionary() ([]Dictionary, error) {
 }
 
 func (d Dictionary) UpdateDictionary() error {
-	query := "UPDATE dictionary SET word = ?, description = ?, example = ?"
+	query := "UPDATE dictionary SET word = ?, translate = ?, description = ?, example = ?"
 
 	stmt, err := db.DB.Prepare(query)
 
@@ -74,7 +75,7 @@ func (d Dictionary) UpdateDictionary() error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(d.Word, d.Description, d.Example)
+	_, err = stmt.Exec(d.Word, d.Translate, d.Description, d.Example)
 
 	if err != nil {
 		return fmt.Errorf("failed to execute update: %w", err)
@@ -98,11 +99,11 @@ func (d Dictionary) DeleteDictionary() error {
 }
 
 func GetAllDictionaryById(id int64) (*Dictionary, error) {
-	query := "SELECT id, word, description, example FROM dictionary WHERE id = ?"
+	query := "SELECT id, word, translate, description, example FROM dictionary WHERE id = ?"
 
 	row := db.DB.QueryRow(query, id)
 	var dictionary Dictionary
-	err := row.Scan(&dictionary.ID, &dictionary.Word, &dictionary.Description, &dictionary.Example)
+	err := row.Scan(&dictionary.ID, &dictionary.Word, &dictionary.Translate, &dictionary.Description, &dictionary.Example)
 	if err != nil {
 		return nil, err
 	}
