@@ -62,6 +62,37 @@ func GetAllPhrasa() ([]Phrasa, error) {
 	return phrasa, nil
 }
 
+func GetPhrasaWithPagination(page, limit int) ([]Phrasa, int, error) {
+	offset := (page - 1) * limit
+
+	query := "SELECT id, word, translate FROM phrasa LIMIT ? OFFSET ?"
+	totalCountQuery := "SELECT COUNT(*) FROM phrasa"
+
+	var totalPhrases int
+	err := db.DB.QueryRow(totalCountQuery).Scan(&totalPhrases)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := db.DB.Query(query, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var phrasa []Phrasa
+	for rows.Next() {
+		var ph Phrasa
+		err := rows.Scan(&ph.ID, &ph.Word, &ph.Translate)
+		if err != nil {
+			return nil, 0, err
+		}
+		phrasa = append(phrasa, ph)
+	}
+
+	return phrasa, totalPhrases, nil
+}
+
 func (p Phrasa) UpdatePhrasa() error {
 	query := "UPDATE phrasa SET word = ?, translate = ?"
 

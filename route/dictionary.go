@@ -29,14 +29,36 @@ func createDictionary(context *gin.Context) {
 }
 
 func getAllDictionary(context *gin.Context) {
-	dictionary, err := models.GetAllDictionary()
+	pageStr := context.DefaultQuery("page", "1")
+	limitStr := context.DefaultQuery("limiit", "10")
 
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	dictionary, totalDictionary, err := models.GetDictionary(page, limit)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not parse dictionary"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch data"})
 		return
 	}
-	context.JSON(http.StatusOK, dictionary)
+
+	// Calculate total pages
+	totalPages := (totalDictionary + limit - 1) / limit
+
+	// Return the structured response
+	context.JSON(http.StatusOK, gin.H{
+		"currentPage": page,
+		"totalPage":   totalPages,
+		"data":        dictionary,
+	})
 }
+
 func updateDictionary(context *gin.Context) {
 	dictionaryId, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
@@ -72,7 +94,7 @@ func getDictionaryById(context *gin.Context) {
 		return
 	}
 
-	test, err := models.GetAllDictionaryById(dictionaryId)
+	test, err := models.GetDictionaryById(dictionaryId)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch dictionary"})
@@ -90,7 +112,7 @@ func deleteDictionary(context *gin.Context) {
 		return
 	}
 
-	dictionary, err := models.GetAllDictionaryById(dictionaryId)
+	dictionary, err := models.GetDictionaryById(dictionaryId)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch the dictionary"})

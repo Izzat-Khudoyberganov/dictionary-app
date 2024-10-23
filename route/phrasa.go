@@ -29,13 +29,36 @@ func createPhrasa(context *gin.Context) {
 }
 
 func getAllPhrasa(context *gin.Context) {
-	phrasa, err := models.GetAllPhrasa()
+	// Get query parameters for pagination, with default values if not provided
+	pageStr := context.DefaultQuery("page", "1")
+	limitStr := context.DefaultQuery("limit", "10")
 
+	// Convert query parameters to integers
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+
+	// Call the model function to fetch the data with pagination
+	phrasa, totalPhrases, err := models.GetPhrasaWithPagination(page, limit)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not parse phrasa"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not fetch data"})
 		return
 	}
-	context.JSON(http.StatusOK, phrasa)
+
+	// Calculate total pages
+	totalPages := (totalPhrases + limit - 1) / limit
+
+	// Return the structured response
+	context.JSON(http.StatusOK, gin.H{
+		"currentPage": page,
+		"totalPage":   totalPages,
+		"data":        phrasa,
+	})
 }
 
 func updatePhrasa(context *gin.Context) {
