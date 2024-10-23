@@ -19,4 +19,11 @@ func RegisterRoutes(server *gin.Engine) {
 
 	server.POST("/admin", createAdmin)
 	server.POST("/login-admin", loginAdmin)
+
+	authenticateAdmin.POST("/phrasal-verbs", createPhrasa)
+	authenticateAdmin.PATCH("/phrasal-verbs/:id", updatePhrasa)
+	authenticateAdmin.DELETE("/phrasal-verbs/:id", deletePhrasa)
+
+	server.GET("/phrasal-verbs", getAllPhrasa)
+	server.GET("/phrasal-verbs/:id", getPhrasaById)
 }

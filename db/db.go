@@ -52,5 +52,18 @@ func createTables() error {
 		panic("Could not create tests table")
 	}
 
+	createPhrasaTable := `
+		CREATE TABLE IF NOT EXISTS phrasa (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			word TEXT NOT NULL,
+			translate TEXT NOT NULL
+		)
+	`
+
+	_, err = DB.Exec(createPhrasaTable)
+	if err != nil {
+		panic("Could not create phrasa table")
+	}
+
 	return err
 }
